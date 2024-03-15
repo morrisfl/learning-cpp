@@ -5,10 +5,13 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 int main(){
-    std::string str;
-    std::cin >> str;
-    std::cout << str;
+    string str;
+    cout << "Enter your name: " << flush;
+    cin >> str;
+    cout << "Nice to meet you, " << str << "!" << endl;
 
     std::cout << std::endl << std::endl;
     return (0);
