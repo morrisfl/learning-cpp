@@ -1,5 +1,7 @@
 #include "records.h"
 #include <iostream>
+#include <string>
+#include <fstream>
 
 Student::Student(int the_id, std::string the_name){
     id = the_id;
@@ -105,15 +107,105 @@ std::string StudentRecords::get_course_name(int cid) const{
     return courses[j].get_name();
 }
 
-void StudentRecords::report_card(int sid){
+void StudentRecords::report_card(int sid, std::ofstream& stream){
     float points = 0.0f, credits = 0.0f;
-    std::cout << std::endl << "Report Card for " << get_student_name(sid) << std::endl;
+    stream << std::endl << "Report Card for " << get_student_name(sid) << std::endl;
     for (Grade& grd : grades)
         if (grd.get_student_id() == sid){
-            std::cout << get_course_name(grd.get_course_id()) << ": " << grd.get_grade() << std::endl;
+            stream << get_course_name(grd.get_course_id()) << ": " << grd.get_grade() << std::endl;
             unsigned char current_credits = get_course_credits(grd.get_course_id());
             credits += current_credits;
             points += get_num_grade(grd.get_grade()) * current_credits;
         }
-    std::cout << "GPA: " << (points / credits) << std::endl;
+    stream << "GPA: " << (points / credits) << std::endl;
+}
+
+void StudentRecords::report_file(std::ofstream &outFile){
+    int sid;
+    outFile.open("report.txt");
+    if (outFile.fail())
+        std::cout << std::endl << "Could not open the file!" << std::endl;
+    else{
+        outFile << "========================================" << std::endl;
+        for (Student& s : students){
+            sid = s.get_id();
+            report_card(sid, outFile);
+            outFile << "========================================" << std::endl; 
+        }
+        outFile.close();
+        std::cout << "Created report.txt successfully" << std::endl;
+    }
+}
+
+void StudentRecords::read_courses(std::string txt_file){
+    std::ifstream inFile;
+    std::string str;
+
+    inFile.open(txt_file);
+    if (inFile.fail())
+        std::cout << std::endl << "File not found!" << std::endl;
+    else{
+        while (!inFile.eof()){
+            getline(inFile, str);
+            int cid = stoi(str);
+
+            getline(inFile, str);
+            std::string c_name = str;
+
+            getline(inFile, str);
+            unsigned char credit = stoi(str);
+
+            add_course(cid, c_name, credit);
+            
+        }
+        inFile.close();
+    }
+
+}
+
+void StudentRecords::read_grades(std::string txt_file){
+    std::ifstream inFile;
+    std::string str;
+
+    inFile.open(txt_file);
+    if (inFile.fail())
+        std::cout << std::endl << "File not found!" << std::endl;
+    else{
+        while (!inFile.eof()){
+            getline(inFile, str);
+            int sid = stoi(str);
+
+            getline(inFile, str);
+            int cid = stoi(str);
+
+            getline(inFile, str);
+            char grade = str[0];
+
+            add_grade(sid, cid, grade);
+            
+        }
+        inFile.close();
+    }
+}
+
+void StudentRecords::read_students(std::string txt_file){
+    std::ifstream inFile;
+    std::string str;
+
+    inFile.open(txt_file);
+    if (inFile.fail())
+        std::cout << std::endl << "File not found!" << std::endl;
+    else{
+        while (!inFile.eof()){
+            getline(inFile, str);
+            int sid = stoi(str);
+
+            getline(inFile, str);
+            std::string s_name = str;
+
+            add_student(sid, s_name);
+            
+        }
+        inFile.close();
+    }
 }
